@@ -1,5 +1,12 @@
 /* Import node's http module: */
 var http = require('http');
+var handleRequest = require('./request-handler');
+var url = require('url');
+
+
+var routes = {
+  '/classes/messages': handleRequest.requestHandler
+};
 
 
 // Every server needs to listen on a port with a unique number. The
@@ -15,14 +22,24 @@ var port = 3000;
 var ip = '127.0.0.1';
 
 
-
 // We use node's http module to create a server.
 //
 // The function we pass to http.createServer will be used to handle all
 // incoming requests.
 //
+
+debugger;
 // After creating the server, we will tell it to listen on the given port and IP. */
-var server = http.createServer(handleRequest);
+var server = http.createServer((request, response) => {
+  let urlParts = url.parse(request.url);
+  let route = routes[urlParts.pathname];
+  if (route) {
+    route(request, response);
+  } else {
+    response.writeHead(404, {'Content-Type': 'text/plain'});
+    response.end('Not Found!');
+  }
+});
 console.log('Listening on http://' + ip + ':' + port);
 server.listen(port, ip);
 
